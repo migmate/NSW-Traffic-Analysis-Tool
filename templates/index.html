@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTAT Home</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <!-- DataTables CSS with Bootstrap 5 integration -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css"/>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/styles.css') }}">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+    <!-- DataTables JavaScript -->
+    <script type="text/javascript" charset="utf8"
+            src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap5.min.js"></script>
+
+    <!-- There was a mistake in your original code where you included Bootstrap CSS as a script; I've removed that. -->
+
+
+    <script>
+        $(document).ready(function () {
+            $('#myTable').DataTable({
+                scrollX: true,
+                responsive: true,
+                ajax: '/penalty_cases', // initial data source
+                columns: [
+                    {data: 'OFFENCE_FINYEAR'},
+                    {data: 'OFFENCE_MONTH'},
+                    {data: 'OFFENCE_CODE'},
+                    {data: 'OFFENCE_DESC'},
+                    {data: 'LEGISLATION'},
+                    {data: 'SECTION_CLAUSE'},
+                    {data: 'FACE_VALUE'},
+                    {data: 'CAMERA_IND'},
+                    {data: 'CAMERA_TYPE'},
+                    {data: 'LOCATION_CODE'},
+                    {data: 'LOCATION_DETAILS'},
+                    {data: 'SCHOOL_ZONE_IND'},
+                    {data: 'SPEED_BAND'},
+                    {data: 'SPEED_IND'},
+                    {data: 'POINT_TO_POINT_IND'},
+                    {data: 'RED_LIGHT_CAMERA_IND'},
+                    {data: 'SPEED_CAMERA_IND'},
+                    {data: 'SEATBELT_IND'},
+                    {data: 'MOBILE_PHONE_IND'},
+                    {data: 'PARKING_IND'},
+                    {data: 'CINS_IND'},
+                    {data: 'FOOD_IND'},
+                    {data: 'BICYCLE_TOY_ETC_IND'},
+                    {data: 'TOTAL_NUMBER'},
+                    {data: 'TOTAL_VALUE'}
+
+                ]
+            });
+
+            function updateSelectedState() {
+                $(".nav-link").removeClass("selected"); // Remove the selected class from all nav-links
+
+                // Find the checked radio button and add the selected class to its parent label
+                $("input[name='buttonsGroup']:checked").parent().addClass("selected");
+            }
+
+// Initial state update (in case one is pre-selected)
+            updateSelectedState();
+            $(".form-check-input").on("change", function () {
+                updateSelectedState();
+            });
+
+            const $mainForm = $("#mainForm");
+            const $date1 = $("#date1");
+            const $date2 = $("#date2");
+            const $radio1 = $("#radio1");
+            const $radio2 = $("#radio2");
+            const $radio3 = $("#radio3");
+            const $radio4 = $("#radio4");
+            const $radio5 = $("#radio5");
+            const $key_word = $("#keyword");
+            const $offenseCode1 = $("#offenseCode1");
+            const $offenseCode2 = $("#offenseCode2");
+
+
+            const $graphPlaceholder = $("#graphPlaceholder");
+            const $myTable = $('#myTable');
+
+            function updateDataTable(startDate, endDate) {
+                let table = $myTable.DataTable();
+                table.ajax.url('/penalty_cases?date1=' + startDate + '&date2=' + endDate);
+                table.ajax.reload();
+            }
+
+            function fetchImageData(startDate, endDate) {
+                $.ajax({
+                    type: "GET",
+                    url: "/route_for_button2",
+                    data: {
+                        date1: startDate,
+                        date2: endDate
+                    },
+                    success: function (response) {
+                        const graphData = response.plot;
+                        $graphPlaceholder.html(`
+    <img src="data:image/png;base64,${graphData}" class="img-fluid" alt="Responsive image">
+    <a href="data:image/png;base64,${graphData}" download="plot.png" class="btn btn-primary mt-2">Download</a>
+    <a href="data:image/png;base64,${graphData}" target="_blank" class="btn btn-secondary mt-2 ml-2">Open in New Tab</a>
+`);
+                        let table = $myTable.DataTable();
+                        table.ajax.url('/penalty_cases?date1=' + startDate + '&date2=' + endDate);
+                        table.ajax.reload();
+                    },
+                    error: function (error) {
+                        console.error("Error fetching image:", error);
+                    }
+                });
+            }
+
+
+            function radio3(startDate, endDate, key_word) {
+                // If radio3 is selected, perform the AJAX GET request with additional parameters
+                console.log(startDate, endDate, key_word);
+
+                // Add a change event listener to all radio buttons
+                let table = $myTable.DataTable();
+
+                // Initial state when the page loads (disable if radio3 is initially selected)
+                table.ajax.url('/route_for_button3?date1=' + startDate + '&date2=' + endDate + '&key_word=' + key_word);
+                table.ajax.reload();
+            }
+
+            function radio4(startDate, endDate) {
+                // If radio4 is selected, perform the AJAX GET request with additional parameters
+                $.get(`/route_for_button4?date1=${startDate}&date2=${endDate}`)
+                    .done(function (response) {
+                        console.log(startDate, endDate);
+
+                        // Display the count of mobile cases
+                        $("#mobileCaseCount").html(`Mobile cases: ${response.mobile_cases}`);
+
+                        // Display the count of school zone cases
+                        $("#schoolZoneCaseCount").html(`School zone cases: ${response.mobile_cases_in_school_zone}`);
+
+                        // Display the OFFENCE_MONTH with the smallest TOTAL_NUMBER
+                        $("#minOffenceMonth").html(`Offence month with smallest total number of cases: ${response.min_offence_month}`);
+
+                        // Display the OFFENCE_MONTH with the biggest TOTAL_NUMBER
+                        $("#maxOffenceMonth").html(`Offence month with biggest total number of cases: ${response.max_offence_month}`);
+
+                        // Display the OFFENCE_MONTH with the smallest TOTAL_VALUE
+                        $("#minOffenceMonthTotalValue").html(`Offence month with smallest total value: ${response.min_offence_month_total_value}`);
+
+                        // Display the OFFENCE_MONTH with the biggest TOTAL_VALUE
+                        $("#maxOffenceMonthTotalValue").html(`Offence month with biggest total value: ${response.max_offence_month_total_value}`);
+
+                        // Parse the response and display the graph
+                        let graphData = response.plot;
+                        $("#graphPlaceholder").html(` <img src="data:image/png;base64,${graphData}" class="img-fluid" alt="Responsive image">
+    <a href="data:image/png;base64,${graphData}" download="plot.png" class="btn btn-primary mt-2">Download</a>
+    <a href="data:image/png;base64,${graphData}" target="_blank" class="btn btn-secondary mt-2 ml-2">Open in New Tab</a>
+
+`);
+
+                    })
+                    .fail(function (error) {
+                        console.error("Error fetching data for graph:", error);
+                    });
+            }
+
+
+            function radio5(startDate, endDate, offenseCode1, offenseCode2) {
+                // Perform AJAX request to fetch data for generating the graph
+                $.get(`/plot_offense_codes?date1=${startDate}&date2=${endDate}&offense_code_1=${offenseCode1}&offense_code_2=${offenseCode2}`)
+                    .done(function (response) {
+                        // Parse the response and display the graph
+                        let graphData = response.plot;
+                        $("#graphPlaceholder").html(` <img src="data:image/png;base64,${graphData}" class="img-fluid" alt="Responsive image">
+    <a href="data:image/png;base64,${graphData}" download="plot.png" class="btn btn-primary mt-2">Download</a>
+    <a href="data:image/png;base64,${graphData}" target="_blank" class="btn btn-secondary mt-2 ml-2">Open in New Tab</a>
+
+`);
+                    })
+                    .fail(function (error) {
+                        console.error("Error fetching data for graph:", error);
+                    });
+
+                let table = $('#myTable').DataTable();
+                table.ajax.url('/plot_offense_codes?date1=' + startDate + '&date2=' + endDate);
+                table.ajax.reload();
+            }
+
+
+            $mainForm.submit(function (e) {
+                e.preventDefault();  // Prevent the default form submission
+
+                const startDate = $date1.val();
+                const endDate = $date2.val();
+                const key_words = $key_word.val();
+                const offenseCode1 = $offenseCode1.val();
+                const offenseCode2 = $offenseCode2.val();
+
+
+                if ($radio1.prop("checked")) {
+                    updateDataTable(startDate, endDate);
+                } else if ($radio2.prop("checked")) {
+                    fetchImageData(startDate, endDate);
+                } else if ($radio3.prop("checked")) {
+                    radio3(startDate, endDate, key_words);
+                } else if ($radio4.prop("checked")) {
+                    radio4(startDate, endDate);
+                } else if ($radio5.prop("checked")) {
+                    radio5(startDate, endDate, offenseCode1, offenseCode2)
+                }
+
+            });
+
+        });
+
+
+    </script>
+
+
+</head>
+
+<body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar with buttons -->
+        <div class="col-md-2">
+            <div class="sidebar p-4"
+                 style="background-color: #f5f5f5; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <label class="nav-link link-dark" aria-current="page" for="radio1">
+                            <input class="form-check-input me-2" type="radio" id="radio1" name="buttonsGroup">
+                            Penalty Case Report
+                        </label>
+                    </li>
+                    <li class="nav-item">
+                        <label class="nav-link link-dark" for="radio2">
+                            <input class="form-check-input me-2" type="radio" id="radio2" name="buttonsGroup">
+                            Distribution of Penalty Cases
+                        </label>
+                    </li>
+                    <li class="nav-item">
+                        <label class="nav-link link-dark" for="radio3">
+                            <input class="form-check-input me-2" type="radio" id="radio3" name="buttonsGroup">
+                            Radar/Camera Cases Description Search
+                        </label>
+                    </li>
+                    <li class="nav-item">
+                        <label class="nav-link link-dark" for="radio4">
+                            <input class="form-check-input me-2" type="radio" id="radio4" name="buttonsGroup">
+                            Mobile Offence Analytics
+                        </label>
+                    </li>
+                    <li class="nav-item">
+                        <label class="nav-link link-dark" for="radio5">
+                            <input class="form-check-input me-2" type="radio" id="radio5" name="buttonsGroup">
+                            Offence Code Comparison
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Main Content Area -->
+        <div class="col-md-7">
+            <div class="main-content">
+                <!-- Top Input Area -->
+                <div class="top-inputs">
+                    <form action="" method="GET" id="mainForm">
+                        <input id="date1" name="date1" type="date" placeholder="Date 1">
+                        <input id="date2" name="date2" type="date" placeholder="Date 2">
+                        <input id="keyword" type="text" placeholder="Offence Desc Search:">
+                        <input type="submit" value="Submit" id="submit" class="btn btn-primary">
+
+                    </form>
+                </div>
+
+                <!-- Middle Input Area -->
+                <div class="middle-inputs">
+                    <input id="offenseCode1" type="text" placeholder="Offense code 1">
+                    <input id="offenseCode2" type="text" placeholder="Offense code 2">
+                </div>
+
+                <!-- Table -->
+                <table id="myTable" class="table table-striped table-bordered table-hover table-nowrap"
+                       style="width:100%">
+                    <thead>
+                    <tr>
+                        <th>OFFENCE_FINYEAR</th>
+                        <th>OFFENCE_MONTH</th>
+                        <th>OFFENCE_CODE</th>
+                        <th>OFFENCE_DESC</th>
+                        <th>LEGISLATION</th>
+                        <th>SECTION_CLAUSE</th>
+                        <th>FACE_VALUE</th>
+                        <th>CAMERA_IND</th>
+                        <th>CAMERA_TYPE</th>
+                        <th>LOCATION_CODE</th>
+                        <th>LOCATION_DETAILS</th>
+                        <th>SCHOOL_ZONE_IND</th>
+                        <th>SPEED_BAND</th>
+                        <th>SPEED_IND</th>
+                        <th>POINT_TO_POINT_IND</th>
+                        <th>RED_LIGHT_CAMERA_IND</th>
+                        <th>SPEED_CAMERA_IND</th>
+                        <th>SEATBELT_IND</th>
+                        <th>MOBILE_PHONE_IND</th>
+                        <th>PARKING_IND</th>
+                        <th>CINS_IND</th>
+                        <th>FOOD_IND</th>
+                        <th>BICYCLE_TOY_ETC_IND</th>
+                        <th>TOTAL_NUMBER</th>
+                        <th>TOTAL_VALUE</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- This will be populated by DataTables via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="right-content">
+                <h2>Generated Graph:</h2>
+                <div id="graphPlaceholder">
+                </div>
+                <div id="mobileCaseCount"></div>
+                <div id="schoolZoneCaseCount"></div>
+                <div id="minOffenceMonth"></div>
+                <div id="maxOffenceMonth"></div>
+                <div id="minOffenceMonthTotalValue"></div>
+                <div id="maxOffenceMonthTotalValue"></div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>
+
