@@ -1,4 +1,5 @@
 ###Project Overview
+
 ##Introduction
 This project was born from a collaborative university assessment, where I took the lead in developing an innovative tool focused on data analysis and visualization. Leveraging a dynamic stack that includes HTML, CSS, Bootstrap, Ajax, and Flask, our tool aims to simplify the exploration and interpretation of complex datasets via a simple graphical interface.
 
